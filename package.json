@@ -10,11 +10,23 @@
     "benchmark": "^2.1.4"
   },
   "scripts": {
-    "test": "node ./performance-test.js"
+    "test": "node ./performance-test.js",
+    "perftest": "node ./perf-test.js",
+    "speedtest": "node ./speed-test.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sljohnsondev/performance_playground.git"
+  },
+  "fork": {
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/sushidub/performance_playground.git"
+    },
+    "homepage": "https://github.com/sushidub/performance_playground#readme",
+    "bugs": {
+      "url": "https://github.com/sushidub/performance_playground/issues"
+    }
   },
   "author": "",
   "license": "MIT",
