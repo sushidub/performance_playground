@@ -1,7 +1,7 @@
 const Benchmark = require('benchmark');
 const {
-  noopList, iterations, create_test_array, single_val_arr
-} = require('./tests/function-call-syntax.js'); // TODO: require argument should be passed in when invoking the node repl
+  testList, iterations, create_test_array, single_val_arr, displayReturns
+} = require('./tests/test-method-template.js'); // TODO: require argument should be passed in when invoking the node repl
 const test_array = !create_test_array 
   ? !single_val_arr 
     ? null
@@ -10,6 +10,14 @@ const test_array = !create_test_array
 const test_val = test_array;
 const suite = new Benchmark.Suite;
 
+// optionally store and display the returned values for each test
+suite.options.showResults = displayReturns;
+suite.results = [];
+suite.displayResults = (result) => {
+  return console.info("returned: \t%O\n\n", result.returned);
+};
+
+// modified for output readability
 Benchmark.prototype.toString = function modified_toStringBench() {
   var bench = this,
       error = bench.error,
@@ -40,20 +48,37 @@ Benchmark.prototype.toString = function modified_toStringBench() {
 }
 
 // stack and start bench tests
-console.info('running %d perf tests', noopList.length);
-noopList.forEach( (fn) => {
+console.info('running %d perf tests\n', testList.length);
+testList.forEach( (fn,idx) => {
   suite.add(`${fn.name}`, function() {
-    fn(test_val)
+    if (suite.options.showResults) {
+      suite.results[fn.name] = {};
+      suite.results[fn.name].idx = idx;
+      suite.results[fn.name].fn = testList[idx];
+      suite.results[fn.name].returned = fn.call(fn, test_val);
+    } else {
+      // we bind our 'this' to the tests scope
+      // TODO: probably need to make the 'this' binding optional
+      fn.call(fn, test_val);
+    }
   })
 });
 
 // add listeners
 suite
   .on('cycle', function(event) {
-    console.log(String(event.target))
+    // OP's original individual bench metrics for each test
+    console.log(String(event.target));
+    
+    // display returned values from each test*
+    // TODO: need to add an escape or break condition for suites using create_test_array vs. single_val_arr array
+    if (this.options.showResults) {
+      this.displayResults(this.results[event.target.name]);
+    }
   })
-  .on('complete', function() {
-    console.log('The most efficient method is \x1b[36m[' + this.filter('fastest').map('name') + ']\x1b[0m');
+  .on('complete', function(event) {
+    const podium = this.filter('fastest')[0];
+    console.log('Perf Results\nThe most efficient method is \x1b[36m%s\x1b[0m\n\x1b[2m%s\x1b[0m\n', podium.name, testList.find(test => test.name === podium.name));
   })
   // run async or not
   .run({ 'async': false });
