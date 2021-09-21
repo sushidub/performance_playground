@@ -1,5 +1,6 @@
 # tests
 tests/*
+!tests/test-method-template.js
 
 # Logs
 logs
