@@ -1,13 +1,15 @@
 const Benchmark = require('benchmark');
 const {
-  noopList, iterations, create_test_array
-} = require('./tests/get-types'); // TODO: require argument should be passed in when invoking the node repl
-test_array = create_test_array(iterations);
-const single_val_arr = [];
+  noopList, iterations, create_test_array, single_val_arr
+} = require('./tests/function-call-syntax.js'); // TODO: require argument should be passed in when invoking the node repl
+const test_array = !create_test_array 
+  ? !single_val_arr 
+    ? null
+    : single_val_arr
+  : create_test_array(iterations);
 const test_val = test_array;
 const suite = new Benchmark.Suite;
 
-// adjustments to display output
 Benchmark.prototype.toString = function modified_toStringBench() {
   var bench = this,
       error = bench.error,
@@ -38,7 +40,7 @@ Benchmark.prototype.toString = function modified_toStringBench() {
 }
 
 // stack and start bench tests
-console.info('running %d perf tests...\n', noopList.length);
+console.info('running %d perf tests', noopList.length);
 noopList.forEach( (fn) => {
   suite.add(`${fn.name}`, function() {
     fn(test_val)
